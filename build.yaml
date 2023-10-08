@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      soft_plc_generator|soft_plc:
+        enabled: true
+
+builders:
+  debug_generator:
+    target: ":soft_plc_generator"
+    import: "package:soft_plc_generator/builder.dart"
+    builder_factories: ["debugGenerator"]
+    build_extensions: {".dart": [".debug_generator.g.part"]}
+    auto_apply: dependents
+    build_to: source
+    applies_builders: ["source_gen|combining_builder"]
