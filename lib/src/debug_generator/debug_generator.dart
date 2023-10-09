@@ -16,7 +16,7 @@ class DebugGenerator extends GeneratorForAnnotation<Debug> {
     element.visitChildren(visitor);
 
     
-    buffer.writeln('extension ${visitor.className}Debug on ${visitor.className} {');
+    buffer.writeln('extension \$${visitor.className}Debug on ${visitor.className} {');
     buffer.writeln('String getDebugValue() {');
     buffer.writeln("final \$c = JsonEncoder.withIndent('  ');");
     buffer.writeln('return \$c.convert({"${visitor.className}": {');
@@ -74,7 +74,7 @@ class DebugGenerator extends GeneratorForAnnotation<Debug> {
     buffer.writeln('case "remove":');
     buffer.writeln('${field.key}.remove(jsonDecode(vArr[1]));');
     buffer.writeln('default:');
-    buffer.writeln("${field.key}[vArr[0]] = jsonDecode(vArr[1]);");
+    buffer.writeln("${field.key}[jsonDecode(vArr[0])] = jsonDecode(vArr[1]);");
     buffer.writeln('}');
   }
 }
