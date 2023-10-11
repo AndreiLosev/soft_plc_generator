@@ -11,16 +11,15 @@ class ModelVisitor extends SimpleElementVisitor<void> {
   @override
   void visitConstructorElement(ConstructorElement element) {
     final elementReturnType = element.type.returnType.toString();
-    className = elementReturnType.replaceFirst('*', '');
+    className = elementReturnType;
   }
 
   @override
   void visitFieldElement(FieldElement element) {
     final elementType = element.type.toString();
-    fields[element.name] = elementType.replaceFirst('*', '');
+    fields[element.name] = elementType;
     iterable[element.name] = isIterable(element.type);
     map[element.name] = element.type.toString().contains('Map');
-    
   }
 
   Iterable<DartType> getSubTypes(DartType type) {

@@ -13,3 +13,11 @@ builders:
     auto_apply: dependents
     build_to: source
     applies_builders: ["source_gen|combining_builder"]
+  task_generator:
+    target: ":soft_plc_generator"
+    import: "package:soft_plc_generator/builder.dart"
+    builder_factories: ["taskGenerator"]
+    build_extensions: {".dart": [".task_generator.g.part"]}
+    auto_apply: dependents
+    build_to: source
+    applies_builders: ["source_gen|combining_builder"]
