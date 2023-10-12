@@ -28,7 +28,6 @@ class ModelVisitor extends SimpleElementVisitor<void> {
 
       if (source.contains('Retain')) {
         final params = getAnnatationParams(source, 'Retain');
-        print([source, source.replaceFirst('Retain', '')]);
         retainAnnatation.add(Annatation(element.name, params));
       } else if (source.contains('Logging')) {
         final params = getAnnatationParams(source, 'Logging');
@@ -80,6 +79,7 @@ class ModelVisitor extends SimpleElementVisitor<void> {
       .replaceFirst(")", '')
       .split(',')
       .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
       .toList()
     ;
   }
