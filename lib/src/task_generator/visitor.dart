@@ -25,22 +25,53 @@ class ModelVisitor extends SimpleElementVisitor<void> {
 
     for (var annatation in element.metadata) {
       final source = annatation.toSource();
-
+      final constR = annatation.computeConstantValue();
       if (source.contains('Retain')) {
-        final params = getAnnatationParams(source, 'Retain');
-        retainAnnatation.add(Annatation(element.name, params));
+
+        final reatainValueType = constR?.getField('reatainValueType')?.toTypeValue()?.toString().replaceFirst("*", "");
+        retainAnnatation.add(Annatation(element.name, {'reatainValueType': reatainValueType}));
+
       } else if (source.contains('Logging')) {
-        final params = getAnnatationParams(source, 'Logging');
-        loggingAnnatation.add(Annatation(element.name, params));
+
+        loggingAnnatation.add(Annatation(element.name, {}));
+
       } else if (source.contains('Monitoring')) {
-        final params = getAnnatationParams(source, 'Monitoring');
-        monitoringAnnatation.add(Annatation(element.name, params));
+
+        final eventType = constR?.getField('eventType')?.toTypeValue()?.toString().replaceFirst("*", "");
+        final eventParams = constR?.getField('eventParams')?.toListValue()?.map((e) => e.toStringValue()?.toString()).toString();
+        final eventFactory = constR?.getField('eventFactory')?.toStringValue()?.toString().replaceFirst("*", "");
+        monitoringAnnatation.add(Annatation(element.name, {
+          'eventType': eventType,
+          'eventParams': eventParams,
+          'eventFactory': eventFactory,
+        }));
+
       } else if (source.contains('NetworkSubscriber')) {
-        final params = getAnnatationParams(source, 'NetworkSubscriber');
-        networkSubscriberAnnatation.add(Annatation(element.name, params));
+
+        final topic = constR?.getField('topic')?.toStringValue()?.toString().replaceFirst('*', '');
+        final type = constR?.getField('type')?.getField('_name')?.toStringValue()?.toString();
+        final factory = constR?.getField('factory')?.toStringValue()?.toString().replaceFirst("*", "");
+        final bigEndian = constR?.getField('bigEndian')?.toBoolValue()?.toString().replaceFirst("*", '');
+        networkSubscriberAnnatation.add(Annatation(element.name, {
+          'topic': topic,
+          'type': type,
+          'factory': factory,
+          'bigEndian': bigEndian,
+        }));
+
       } else if (source.contains('NetworkPublisher')) {
-        final params = getAnnatationParams(source, 'NetworkPublisher');
-        networkPublisherAnnatation.add(Annatation(element.name, params));
+        
+        final topic = constR?.getField('topic')?.toStringValue()?.toString().replaceFirst('*', '');
+        final type = constR?.getField('type')?.getField('_name')?.toStringValue()?.toString();
+        final factory = constR?.getField('factory')?.toStringValue()?.toString().replaceFirst("*", "");
+        final bigEndian = constR?.getField('bigEndian')?.toBoolValue()?.toString().replaceFirst("*", '');
+
+        networkPublisherAnnatation.add(Annatation(element.name, {
+          'topic': topic,
+          'type': type,
+          'factory': factory,
+          'bigEndian': bigEndian,
+        }));
       }
     }
   }
@@ -101,7 +132,7 @@ class MethodProperty {
 
 class Annatation {
   final String fieldName;
-  final List<String> annationsParam;
+  final Map<String, String?> annationsParam;
 
   Annatation(this.fieldName, this.annationsParam);
 
