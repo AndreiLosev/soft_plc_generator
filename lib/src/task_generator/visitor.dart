@@ -101,19 +101,6 @@ class ModelVisitor extends SimpleElementVisitor<void> {
       element.returnType.toString(),
     ));  
   }
-
-  List<String> getAnnatationParams(String source, String annatationType) {
-    return source
-      .replaceFirst('@', '')
-      .replaceFirst(annatationType, '')
-      .replaceFirst('(', '')
-      .replaceFirst(")", '')
-      .split(',')
-      .map((e) => e.trim())
-      .where((e) => e.isNotEmpty)
-      .toList()
-    ;
-  }
 }
 
 

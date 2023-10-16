@@ -20,7 +20,7 @@ class TaskGenerator extends GeneratorForAnnotation<Task> {
     _generateRetainProperty(visitor);
     _generateLoggingProperty(visitor);
     _generateMonitoringProperty(visitor);
-
+    _generateNetworkSubscriberProperty(visitor);
     buffer.write("}");
 
     return buffer.toString();
@@ -56,6 +56,93 @@ class TaskGenerator extends GeneratorForAnnotation<Task> {
     return "implements ${interfaces.join(', ')}";
   }
 
+  void _generateNetworkSubscriberProperty(ModelVisitor visitor) {
+    if (visitor.networkSubscriberAnnatation.isEmpty) {
+      return;
+    }
+
+    buffer.writeln("@override");
+    buffer.writeln("Set<String> getTopicSubscriptions() {");
+    buffer.writeln("return {");
+
+    for (var item in visitor.networkSubscriberAnnatation) {
+      buffer.writeln('"${item.annationsParam['topic']}",');
+    }
+
+    buffer.writeln('};');
+    buffer.writeln('}');
+
+    buffer.writeln("@override");
+    buffer.writeln("void setNetworkProperty(String topic, SmartBuffer value) {");
+    buffer.writeln("switch (topic) {");
+
+    for (var item in visitor.networkSubscriberAnnatation) {
+      buffer.writeln('case "${item.annationsParam["topic"]}":');
+      buffer.writeln('${item.fieldName} = ${_fromSmartBuffer(item, visitor)}');
+    }
+
+    buffer.writeln('}');
+    buffer.writeln('}');
+
+  }
+
+  String _fromSmartBuffer(Annatation item, ModelVisitor visitor) {
+    final factory = item.annationsParam['factory'];
+    final type = item.annationsParam['type'];
+    final bigEndian = item.annationsParam['bigEndian'];
+
+    if (factory != null) {
+      final method = visitor.methods.firstWhere(
+        (e) => e.name == factory, 
+        orElse: () => throw Exception(
+          "if use factory for NetworkSubscriber, class:  ${visitor.className} mast be have method $factory",
+        ), 
+      );
+
+      if (!method.params.contains('SmartBuffer') || method.params.length != 1) {
+        throw Exception(''' *** *** ***
+          factory for NetworkSubscriber, class:  ${visitor.className} mast be 1 parameter, type SmartBuffer
+           ***   ***   ***''');
+      }
+
+      if (visitor.fields[item.fieldName] != method.returnType) {
+        throw Exception(''' *** *** ***
+          factory for NetworkSubscriber, class:  ${visitor.className}::${item.fieldName} mast be return type ${visitor.fields[item.fieldName]}
+           ***   ***   ***''');
+      }
+
+      return "$factory(value);";
+    }
+
+    if (type != null) {
+      return switch(type) {
+        'bool' => "value.getAsBool();",
+        'uint8' => "value.getAsUint8($bigEndian);",
+        'uint16' => "value.getAsUint16($bigEndian);",
+        'uint32' => "value.getAsUint32($bigEndian);",
+        'uint64' => "value.getAsUint64($bigEndian);",
+        'int8' => "value.getAsInt8($bigEndian);",
+        'int16' => "value.getAsInt16($bigEndian);",
+        'int32' => "value.getAsInt32($bigEndian);",
+        'int64' => "value.getAsInt64($bigEndian);",
+        'float' => "value.getAsFloat($bigEndian);",
+        'double' => "value.getAsDouble($bigEndian);",
+        'string' => "value.getAsString();",
+        _ => throw Exception(''' *** *** ***
+          factory for NetworkSubscriber, class:  ${visitor.className}::${item.fieldName} undefaid BinType
+           ***   ***   ***'''),
+      };
+    }
+
+    return switch(visitor.fields[item.fieldName]) {
+      'bool' => "value.getAsBool();",
+      'num' => "value.getAsDouble($bigEndian);",
+      'int' => "value.getAsInt64($bigEndian);",
+      'double' => "value.getAsDouble($bigEndian);",
+      _ => "value.getAsString();",
+    };
+
+  }
 
   void _generateMonitoringProperty(ModelVisitor visitor) {
     if (visitor.monitoringAnnatation.isEmpty) {
