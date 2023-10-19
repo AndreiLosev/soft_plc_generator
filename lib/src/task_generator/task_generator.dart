@@ -17,10 +17,15 @@ class TaskGenerator extends GeneratorForAnnotation<Task> {
 
     buffer.writeln("class \$${visitor.className} extends ${visitor.className} ${getInterfaces(visitor)} {");
 
+    // print(visitor.networkPublisherAnnatation);
+    // print("* * * *");
+    // print(visitor.networkSubscriberAnnatation);
+
     _generateRetainProperty(visitor);
     _generateLoggingProperty(visitor);
     _generateMonitoringProperty(visitor);
     _generateNetworkSubscriberProperty(visitor);
+    _generateNetworkPublisherProperty(visitor);
     buffer.write("}");
 
     return buffer.toString();
@@ -86,6 +91,79 @@ class TaskGenerator extends GeneratorForAnnotation<Task> {
 
   }
 
+  void _generateNetworkPublisherProperty(ModelVisitor visitor) {
+    if (visitor.networkPublisherAnnatation.isEmpty) {
+      return;
+    }
+
+    buffer.writeln("@override");
+    buffer.writeln("Map<String, SmartBuffer> getPeriodicallyPublishedValues() {");
+    buffer.writeln("return {");
+
+    for (var item in visitor.networkPublisherAnnatation) {
+      buffer.writeln('"${item.annationsParam['topic']}": ${_getSmartBuffer(item, visitor)},');
+    }
+
+    buffer.writeln('};');
+    buffer.writeln('}');
+  }
+
+  String _getSmartBuffer(Annatation item, ModelVisitor visitor) {
+    final factory = item.annationsParam['factory'];
+    final type = item.annationsParam['type'];
+    final bigEndian = item.annationsParam['bigEndian'];
+
+    if (factory != null) {
+      final method = visitor.methods.firstWhere(
+        (e) => e.name == factory, 
+        orElse: () => throw Exception(
+          "if use factory for NetworkPublisher, class:  ${visitor.className}::${item.fieldName} mast be have method $factory",
+        ), 
+      );
+
+      if (method.params.isNotEmpty) {
+        throw Exception(''' *** *** ***
+          factory for NetworkPublisher, class:  ${visitor.className}::${item.fieldName} mast be 0 parameter
+           ***   ***   ***''');
+      }
+
+      if (visitor.fields[item.fieldName] != 'SmartBuffer') {
+        throw Exception(''' *** *** ***
+          factory for NetworkSubscriber, class:  ${visitor.className}::${item.fieldName} mast be return type SmartBuffer}
+           ***   ***   ***''');
+      }
+
+      return "$factory();";
+    }
+
+    if (type != null) {
+      return switch(type) {
+        'bool' => "SmartBuffer()..addBool(${item.fieldName})",
+        'uint8' => "SmartBuffer()..addByte(${item.fieldName})",
+        'uint16' => "SmartBuffer()..addUint16(${item.fieldName}, $bigEndian)",
+        'uint32' => "SmartBuffer()..addUint32(${item.fieldName}, $bigEndian)",
+        'uint64' => "SmartBuffer()..addUint64(${item.fieldName}, $bigEndian)",
+        'int8' => "SmartBuffer()..addByte(${item.fieldName}, $bigEndian)",
+        'int16' => "SmartBuffer()..addUint16(${item.fieldName}, $bigEndian)",
+        'int32' => "SmartBuffer()..addUint32(${item.fieldName}, $bigEndian)",
+        'int64' => "SmartBuffer()..addUint64(${item.fieldName}, $bigEndian)",
+        'float' => "SmartBuffer()..addFloat32(${item.fieldName}, $bigEndian)",
+        'double' => "SmartBuffer()..addDouble(${item.fieldName}, $bigEndian)",
+        'string' => "SmartBuffer()..addString(${item.fieldName})",
+        _ => throw Exception(''' *** *** ***
+          factory for NetworkSubscriber, class:  ${visitor.className}::${item.fieldName} undefaid BinType
+           ***   ***   ***'''),
+      };
+    }
+
+    return switch(visitor.fields[item.fieldName]) {
+        'bool' => "SmartBuffer()..addBool(${item.fieldName})",
+        'int' => "SmartBuffer()..addUint64(${item.fieldName}, $bigEndian)",
+        'double' => "SmartBuffer()..addDouble(${item.fieldName}, $bigEndian)",
+        _ => "SmartBuffer()..addString(${item.fieldName})",
+      };
+  }
+
   String _fromSmartBuffer(Annatation item, ModelVisitor visitor) {
     final factory = item.annationsParam['factory'];
     final type = item.annationsParam['type'];
@@ -95,13 +173,13 @@ class TaskGenerator extends GeneratorForAnnotation<Task> {
       final method = visitor.methods.firstWhere(
         (e) => e.name == factory, 
         orElse: () => throw Exception(
-          "if use factory for NetworkSubscriber, class:  ${visitor.className} mast be have method $factory",
+          "if use factory for NetworkSubscriber, class:  ${visitor.className}::${item.fieldName} mast be have method $factory",
         ), 
       );
 
       if (!method.params.contains('SmartBuffer') || method.params.length != 1) {
         throw Exception(''' *** *** ***
-          factory for NetworkSubscriber, class:  ${visitor.className} mast be 1 parameter, type SmartBuffer
+          factory for NetworkSubscriber, class:  ${visitor.className}::${item.fieldName} mast be 1 parameter, type SmartBuffer
            ***   ***   ***''');
       }
 
@@ -136,7 +214,6 @@ class TaskGenerator extends GeneratorForAnnotation<Task> {
 
     return switch(visitor.fields[item.fieldName]) {
       'bool' => "value.getAsBool();",
-      'num' => "value.getAsDouble($bigEndian);",
       'int' => "value.getAsInt64($bigEndian);",
       'double' => "value.getAsDouble($bigEndian);",
       _ => "value.getAsString();",

@@ -30,7 +30,7 @@ class ModelVisitor extends SimpleElementVisitor<void> {
 
         final reatainValueType = constR?.getField('reatainValueType')?.toTypeValue()?.toString().replaceFirst("*", "");
         retainAnnatation.add(Annatation(element.name, {'reatainValueType': reatainValueType}));
-
+    
       } else if (source.contains('Logging')) {
 
         loggingAnnatation.add(Annatation(element.name, {}));
