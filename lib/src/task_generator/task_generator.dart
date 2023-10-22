@@ -206,6 +206,9 @@ class TaskGenerator extends GeneratorForAnnotation<Task> {
         'float' => "value.getAsFloat($bigEndian);",
         'double' => "value.getAsDouble($bigEndian);",
         'string' => "value.getAsString();",
+        'numFromString' => "value.getAsNumString();",
+        'boolFromString' => "value.getAsBoolString();",
+        'fromJsonString' => "value.getAsJsonString<${visitor.fields[item.fieldName]}>();",
         _ => throw Exception(''' *** *** ***
           factory for NetworkSubscriber, class:  ${visitor.className}::${item.fieldName} undefaid BinType
            ***   ***   ***'''),
