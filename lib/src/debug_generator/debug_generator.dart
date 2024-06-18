@@ -2,11 +2,11 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/src/builder/build_step.dart';
+import 'package:plcart/plcart.dart';
 import 'package:soft_plc_generator/src/debug_generator/visitor.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:soft_plc/soft_plc.dart';
 
-class DebugGenerator extends GeneratorForAnnotation<Debug> {
+class DebugGenerator extends GeneratorForAnnotation<Watch> {
 
   final buffer = StringBuffer();
 

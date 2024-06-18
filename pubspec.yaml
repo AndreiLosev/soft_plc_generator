@@ -11,8 +11,8 @@ dependencies:
   build: ^2.4.1
   source_gen: ^1.4.0
   analyzer: ^6.3.0
-  soft_plc:
-    path: ../soft_plc/
+  plcart:
+    path: ../plcart/
 
 dev_dependencies:
   build_runner: ^2.4.6
