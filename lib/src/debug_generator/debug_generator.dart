@@ -17,16 +17,15 @@ class DebugGenerator extends GeneratorForAnnotation<Watch> {
 
     
     buffer.writeln('extension \$${visitor.className}Debug on ${visitor.className} {');
-    buffer.writeln('String getDebugValue() {');
-    buffer.writeln("final \$c = JsonEncoder.withIndent('  ');");
-    buffer.writeln('return \$c.convert({"${visitor.className}": {');
+    buffer.writeln('Map debug() {');
+    buffer.writeln('return {"${visitor.className}": {');
 
     for (final field in visitor.fields.keys) {
-      buffer.writeln("'$field': $field.getDebugValue(),");
+      buffer.writeln("'$field': $field,");
     }
 
     buffer.writeln('},');
-    buffer.writeln('});');
+    buffer.writeln('};');
     buffer.writeln('}');
     buffer.writeln('');
    
