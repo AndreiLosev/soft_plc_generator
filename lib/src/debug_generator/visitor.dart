@@ -7,6 +7,7 @@ class ModelVisitor extends SimpleElementVisitor<void> {
   final fields = <String, String>{};
   final iterable = <String, bool>{};
   final map = <String, bool>{};
+  final test = {}; 
 
   @override
   void visitConstructorElement(ConstructorElement element) {
@@ -16,6 +17,9 @@ class ModelVisitor extends SimpleElementVisitor<void> {
 
   @override
   void visitFieldElement(FieldElement element) {
+    if (element.isSynthetic) {
+      return;
+    }
     final elementType = element.type.toString();
     fields[element.name] = elementType;
     iterable[element.name] = isIterable(element.type);

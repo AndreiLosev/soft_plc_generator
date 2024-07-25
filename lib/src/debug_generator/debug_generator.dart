@@ -17,7 +17,7 @@ class DebugGenerator extends GeneratorForAnnotation<Watch> {
 
     
     buffer.writeln('extension \$${visitor.className}Debug on ${visitor.className} {');
-    buffer.writeln('Map debug() {');
+    buffer.writeln('Map toMap() {');
     buffer.writeln('return {"${visitor.className}": {');
 
     for (final field in visitor.fields.keys) {
@@ -28,7 +28,10 @@ class DebugGenerator extends GeneratorForAnnotation<Watch> {
     buffer.writeln('};');
     buffer.writeln('}');
     buffer.writeln('');
-   
+    
+    for (var item in visitor.test.entries) {
+      buffer.writeln("// ${item.key} => ${item.value}");
+    }
     buffer.writeln('void setDebugValue(String name, String value) {');
     buffer.writeln('switch (name) {');
     
