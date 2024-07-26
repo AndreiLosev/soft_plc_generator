@@ -16,15 +16,14 @@ class DebugGenerator extends GeneratorForAnnotation<Watch> {
     element.visitChildren(visitor);
 
     
-    buffer.writeln('extension \$${visitor.className}Debug on ${visitor.className} {');
+    buffer.writeln('mixin \$${visitor.className}Debug on ${visitor.className} {');
     buffer.writeln('Map toMap() {');
-    buffer.writeln('return {"${visitor.className}": {');
+    buffer.writeln('return {');
 
     for (final field in visitor.fields.keys) {
       buffer.writeln("'$field': $field,");
     }
 
-    buffer.writeln('},');
     buffer.writeln('};');
     buffer.writeln('}');
     buffer.writeln('');
